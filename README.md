@@ -6,11 +6,6 @@
 Code for **Attend, Transform, or Silence: Operator-Level Visual Skipping for
 Efficient Multimodal LLM Inference**.
 
-Op-Skip accelerates multimodal prefill by selectively skipping visual Attention
-updates, FFN updates, or both. It retains the visual sequence and full per-layer
-KV cache, without training or changing model weights.
-
-
 ## 🛠️ Installation
 
 Use a separate environment for each model family. From the repository root:
