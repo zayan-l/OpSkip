@@ -1,5 +1,3 @@
-"""Run upstream lmms-eval with Op-Skip, preserving original model/task names."""
-
 import argparse
 import importlib
 import inspect

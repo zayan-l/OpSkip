@@ -1,5 +1,3 @@
-"""Instance-local prefill state and the three experimental operator actions."""
-
 from dataclasses import dataclass, field
 import torch
 

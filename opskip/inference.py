@@ -1,5 +1,3 @@
-"""Minimal image-generation helpers shared by the example and latency script."""
-
 import torch
 from PIL import Image
 

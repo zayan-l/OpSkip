@@ -1,5 +1,3 @@
-"""Qwen3-VL adapter; the upstream model retains vision and DeepStack processing."""
-
 import inspect
 from functools import wraps
 

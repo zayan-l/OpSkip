@@ -1,5 +1,3 @@
-"""Op-Skip: apply a fixed operator policy to an existing model."""
-
 from .policy import Policy, load_policy
 
 

@@ -1,10 +1,3 @@
-"""Measure synchronized warm first-token latency and decoder prefill time.
-
-Compares vanilla with default v3 Op-Skip using one image/prompt. Model loading, CPU image
-preparation and warmup are excluded. Full benchmark averages require the same
-dataset/prompt suite as the original experiment.
-"""
-
 import argparse
 import json
 from pathlib import Path

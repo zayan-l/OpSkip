@@ -1,4 +1,3 @@
-"""Shared rounded RMSNorm and RoPE kernels for Op-Skip model adapters."""
 from functools import wraps
 import torch
 

@@ -1,5 +1,3 @@
-"""Qwen2.5-VL adapter; identify visual rows before upstream embedding substitution."""
-
 import inspect
 from functools import wraps
 
