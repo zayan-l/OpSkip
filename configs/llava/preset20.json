@@ -4,11 +4,10 @@
   "num_layers": 32,
   "preset": 20,
   "budget": 20,
-  "attention_only": [],
+  "attention_only": [2],
   "ffn_only": [
     0,
     3,
-    4,
     5,
     16,
     17,

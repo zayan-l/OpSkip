@@ -4,16 +4,12 @@
 </h1>
 
 Code for **Attend, Transform, or Silence: Operator-Level Visual Skipping for
-Efficient Multimodal LLM Inference** ([paper](https://arxiv.org/abs/2606.31903)).
+Efficient Multimodal LLM Inference**.
 
 Op-Skip accelerates multimodal prefill by selectively skipping visual Attention
 updates, FFN updates, or both. It retains the visual sequence and full per-layer
 KV cache, without training or changing model weights.
 
-## 🔥 News
-
-- `2026.09.11` 📦 Added Op-Skip implementations, preset policies, and evaluation scripts for Qwen2.5-VL, Qwen3-VL, LLaVA-1.5, and LLaVA-NeXT.
-- `2026.06.30` 📄 Our paper [Attend, Transform, or Silence](https://arxiv.org/abs/2606.31903) is available on arXiv!
 
 ## 🛠️ Installation
 
@@ -122,21 +118,6 @@ For other models, use `eval_qwen2_5_vl.sh`, `eval_llava.sh`, or
 Use the same checkpoint, data, prompts, and image settings for comparisons.
 Each run saves its policy and evaluator arguments in `opskip_config.json`.
 
-## ⚡ Prefill speedup
-
-Optimized Op-Skip versus Vanilla on A800-SXM4-80GB, batch size 1.
-Each cell is the **median of ten task-level speedup ratios at that preset**.
-
-| Preset | Qwen2.5-VL-7B | Qwen3-VL-8B | LLaVA-1.5-7B | LLaVA-NeXT-7B |
-|---:|---:|---:|---:|---:|
-| 8 | 1.278× | — | 1.182× | 1.252× |
-| 12 | 1.296× | 1.158× | 1.219× | 1.343× |
-| 16 | 1.358× | 1.187× | 1.264× | 1.447× |
-| 20 | 1.403× | 1.205× | 1.301× | 1.566× |
-| 24 | 1.428× | 1.216× | 1.361× | 1.708× |
-| 28 | 1.458× | 1.228× | 1.418× | 1.877× |
-| 32 | — | 1.247× | 1.488× | 2.084× |
-| 36 | — | 1.269× | — | — |
 
 ## ⏱️ Latency benchmark
 
@@ -151,17 +132,3 @@ python scripts/benchmark_latency.py \
   --output outputs/latency.json
 ```
 
-## 📄 Citation
-
-```bibtex
-@article{luo2026attend,
-  title={Attend, Transform, or Silence: Operator-Level Visual Skipping for Efficient Multimodal LLM Inference},
-  author={Luo, Zhaoyang and Dong, Runmin and Yang, Miao and Wei, Fan and Lai, Yushan and Luo, Bin and Fu, Haohuan},
-  journal={arXiv preprint arXiv:2606.31903},
-  year={2026}
-}
-```
-
-## 🙏 Acknowledgements
-
-Our code builds on the excellent open-source contributions of Transformers, Qwen, LLaVA, LLaVA-NeXT, and lmms-eval. We express our sincere gratitude to their authors and contributors for making this work possible.
