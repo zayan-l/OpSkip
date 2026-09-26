@@ -4,7 +4,9 @@
   "num_layers": 32,
   "preset": 20,
   "budget": 20,
-  "attention_only": [2],
+  "attention_only": [
+    2
+  ],
   "ffn_only": [
     0,
     3,
@@ -28,7 +30,8 @@
     30,
     31
   ],
-  "freeze_scope": "prefix_through_visual",
+  "freeze_scope": "visual",
   "mlp_chunk_size": 0,
-  "source": "Eval/scripts/lmms/llava/llava15-frozen2.sh"
+  "source": "Eval/scripts/lmms/llava/llava15-frozen2.sh",
+  "use_triton": false
 }

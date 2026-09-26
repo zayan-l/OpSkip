@@ -1,4 +1,5 @@
 import argparse
+from opskip.policy import add_policy_options
 import importlib
 import inspect
 import json
@@ -54,8 +55,9 @@ def main():
     parser.add_argument("--min-pixels", type=int)
     parser.add_argument("--max-pixels", type=int)
     parser.add_argument("--dry-run", action="store_true", help="Print resolved arguments without loading a model")
+    add_policy_options(parser)
     args = parser.parse_args()
-    policy = None if args.policy == "off" else load_policy(args.policy)
+    policy = None if args.policy == "off" else load_policy(args.policy, use_triton=args.use_triton, freeze_scope=args.freeze_scope)
     if policy is not None and policy.model_family != args.family:
         parser.error("Policy model_family does not match --family")
     if args.limit is not None and args.limit <= 0:

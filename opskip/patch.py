@@ -68,11 +68,11 @@ def _parallel_text_mlp(layer, state, changes):
     replace_method(mlp, "forward", forward, changes)
 
 
-def apply_opskip(model, policy):
+def apply_opskip(model, policy, *, use_triton=None, freeze_scope=None):
     """Enable a policy on a dense SDPA model.
     It preserves the operator policy, full KV cache and upstream decode path.
     """
-    policy = load_policy(policy)
+    policy = load_policy(policy, use_triton=use_triton, freeze_scope=freeze_scope)
     if hasattr(model, "_opskip_changes"):
         raise ValueError("Op-Skip is already installed; remove_opskip(model) before changing policy")
     family = policy.model_family
@@ -82,7 +82,7 @@ def apply_opskip(model, policy):
         from .qwen2_5_vl import setup
     else:
         from .llava import setup
-    state, changes = PrefillState(optimized=True), []
+    state, changes = PrefillState(optimized=True, use_triton=policy.use_triton), []
     try:
         layers = setup(model, state, changes, family)
         if len(layers) != policy.num_layers:
@@ -98,7 +98,7 @@ def apply_opskip(model, policy):
                 _patch_layer(layer, action, state, policy, changes)
                 if family == "llava_next" and action in ("freeze", "attention_only"):
                     _parallel_text_mlp(layer, state, changes)
-        if policy.rmsnorm_backend == "triton_rounded":
+        if policy.use_triton and family == "qwen2_5_vl":
             from .kernels.exact import install_qwen25_rmsnorm
             for norm in model.modules():
                 if norm.__class__.__name__ == "Qwen2RMSNorm":

@@ -50,7 +50,7 @@ def cache_llava_next_kv(attn, hidden, *, position_ids=None, past_key_value=None,
         if optimized:
             state.memo[key] = (position_ids, cos, sin, cos, sin)
     rotated = None
-    if optimized:
+    if state is not None and state.use_triton:
         from .kernels.exact import rotary
         rotated = rotary(k, cos, sin)
     k = (k * cos.unsqueeze(1) + rotate_half(k) * sin.unsqueeze(1)
@@ -95,7 +95,7 @@ def selected_attention(attn, hidden, positions, family, *, attention_mask=None,
         k = attn.k_proj(hidden).view(batch, length, -1, dim)
         v = attn.v_proj(hidden).view(batch, length, -1, dim).transpose(1, 2)
     if family == "qwen3_vl":
-        if optimized:
+        if state is not None and state.use_triton:
             from .kernels.exact import rmsnorm
             q, k = rmsnorm(attn.q_norm, q), rmsnorm(attn.k_norm, k)
         else:
@@ -116,7 +116,7 @@ def selected_attention(attn, hidden, positions, family, *, attention_mask=None,
                 cos = torch.cat([part[i % 3] for i, part in enumerate(cos.split(sections, dim=-1))], dim=-1)
                 sin = torch.cat([part[i % 3] for i, part in enumerate(sin.split(sections, dim=-1))], dim=-1)
                 if optimized: state.memo[key] = (source_cos, source_sin, cos, sin)
-        q, k = apply_selected_rotary(q, k, cos, sin, positions, optimized)
+        q, k = apply_selected_rotary(q, k, cos, sin, positions, state is not None and state.use_triton)
     else:
         if position_ids is None:
             position_ids = torch.arange(length, device=hidden.device).unsqueeze(0)
@@ -135,7 +135,7 @@ def selected_attention(attn, hidden, positions, family, *, attention_mask=None,
                 ck, sk = cos, sin
             if optimized:
                 state.memo[key] = (position_ids, cos, sin, ck, sk)
-        q, k = apply_selected_rotary(q, k, ck, sk, positions, optimized)
+        q, k = apply_selected_rotary(q, k, ck, sk, positions, state is not None and state.use_triton)
 
     if past_key_value is not None:
         if family == "qwen3_vl":
@@ -163,8 +163,8 @@ def selected_attention(attn, hidden, positions, family, *, attention_mask=None,
     return attn.o_proj(output)
 
 
-def apply_selected_rotary(q, k, cos, sin, positions, optimized):
-    if optimized:
+def apply_selected_rotary(q, k, cos, sin, positions, use_triton):
+    if use_triton:
         from .kernels.exact import rotary
         qr, kr = rotary(q, cos, sin, positions), rotary(k, cos, sin)
         if qr is not None and kr is not None:

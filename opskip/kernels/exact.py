@@ -85,7 +85,7 @@ def install_qwen25_rmsnorm(norm, changes):
         if not eligible:
             return original(hidden_states)
         if triton is None:
-            raise RuntimeError("Qwen2.5 rounded RMSNorm requires Triton; install it or select rmsnorm_backend='torch'")
+            raise RuntimeError("Qwen2.5 rounded RMSNorm requires Triton; install it or set use_triton=False")
         return _fused_rmsnorm(self, hidden_states)
 
     replace_method(norm, "forward", forward, changes)

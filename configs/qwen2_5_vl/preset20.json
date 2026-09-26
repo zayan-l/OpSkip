@@ -30,8 +30,9 @@
     25,
     27
   ],
-  "freeze_scope": "prefix_through_visual",
+  "freeze_scope": "visual",
   "mlp_chunk_size": 0,
   "source": "Archived qwen25_frozen execution log: qwen25_frozen_7B-Instruct_phase_20-20260621_103728-1838.log (AI2D result matches paper Table 10)",
-  "rmsnorm_backend": "triton_rounded"
+  "rmsnorm_backend": "torch",
+  "use_triton": false
 }

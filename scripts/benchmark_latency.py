@@ -1,4 +1,6 @@
+from dataclasses import asdict
 import argparse
+from opskip.policy import add_policy_options
 import json
 from pathlib import Path
 import statistics
@@ -18,10 +20,11 @@ def main():
     parser.add_argument("--warmup", type=int, default=3)
     parser.add_argument("--repeats", type=int, default=10)
     parser.add_argument("--output", default="outputs/latency.json")
+    add_policy_options(parser)
     args = parser.parse_args()
     if args.repeats <= 0 or args.warmup < 0:
         parser.error("repeats must be positive and warmup must be nonnegative")
-    policy = load_policy(args.policy)
+    policy = load_policy(args.policy, use_triton=args.use_triton, freeze_scope=args.freeze_scope)
     model, inputs, _ = load_example(policy.model_family, args.model, args.image, args.prompt, args.device)
     decoder = decoder_for(model, policy.model_family)
     records = {}
@@ -66,7 +69,7 @@ def main():
                 key: statistics.median(row[key] for row in samples)
                 for key in ("first_token_ms", "decoder_prefill_ms")}}
         remove_opskip(model)
-    output = {"model": args.model, "policy": json.loads(Path(args.policy).read_text()),
+    output = {"model": args.model, "policy": asdict(policy),
               "image": args.image, "prompt": args.prompt, "torch": torch.__version__,
               "device": args.device, "gpu": torch.cuda.get_device_name(args.device) if args.device != "cpu" else None,
               "warmup": args.warmup, "repeats": args.repeats, "aggregation": "median",

@@ -26,7 +26,8 @@
     30,
     31
   ],
-  "freeze_scope": "prefix_through_visual",
+  "freeze_scope": "visual",
   "mlp_chunk_size": 0,
-  "source": "Eval/scripts/lmms/llava/llava-next-frozen.sh"
+  "source": "Eval/scripts/lmms/llava/llava-next-frozen.sh",
+  "use_triton": false
 }

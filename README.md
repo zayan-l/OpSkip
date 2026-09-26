@@ -33,8 +33,8 @@ python -m pip install --no-deps 'git+https://github.com/haotian-liu/LLaVA.git'
 python -m pip install --no-deps 'git+https://github.com/LLaVA-VL/LLaVA-NeXT.git'
 ```
 
-These projects share the `llava` namespace; do not install both in one environment.
-Keep the pinned dependencies and record the model-source commit used for reproduction.
+These projects share the `llava` namespace, do not install both in one environment.
+
 
 ## 🚀 Quick start
 
@@ -64,13 +64,9 @@ python examples/infer.py \
   --prompt 'What is shown in this image?'
 ```
 
-Supported setup: the dense checkpoints above, batch size 1, greedy generation,
-and SDPA. `remove_opskip(model)` restores the patched instance.
-
 ## 🎛️ Policies
 
-Select a JSON file from `configs/<family>/`. The preset number counts selected
-layers, not skipped operators or a FLOPs percentage. Layer indices are zero-based.
+Select a JSON file from `configs/<family>/`. The preset number counts selected layers.
 
 | Family | Presets |
 |---|---|
@@ -79,9 +75,7 @@ layers, not skipped operators or a FLOPs percentage. Layer indices are zero-base
 | LLaVA-1.5 / LLaVA-NeXT | 8, 12, 16, 20, 24, 28, 32 |
 
 `attention_only` keeps visual Attention updates; `ffn_only` keeps visual FFN
-updates; `freeze` skips both. Unlisted layers run normally. In the released
-policies, `freeze` also freezes the text prefix before the visual span, updating
-only the text suffix while retaining K/V for every token.
+updates; `freeze` skips both.
 
 ## 📊 Evaluation
 
@@ -108,7 +102,6 @@ For other models, use `eval_qwen2_5_vl.sh`, `eval_llava.sh`, or
 
 - `--policy off`: Vanilla baseline.
 - `--tasks textvqa_val,pope`: select tasks.
-- `--dry-run`: inspect resolved settings without loading a model.
 
 Use the same checkpoint, data, prompts, and image settings for comparisons.
 Each run saves its policy and evaluator arguments in `opskip_config.json`.

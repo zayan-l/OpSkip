@@ -7,6 +7,7 @@ from .attention import cache_llava_next_kv, selected_attention
 @dataclass
 class PrefillState:
     optimized: bool = False
+    use_triton: bool = False
     memo: dict = field(default_factory=dict)
     rotary_groups: dict = field(default_factory=dict)
     streams: dict = field(default_factory=dict)
@@ -68,13 +69,15 @@ def operator_forward(layer, hidden, action, state, policy, kwargs):
     else:
         attention_kwargs.pop("past_key_value", None)
     nonvisual = state.nonvisual.to(hidden.device)
-    if state.optimized:
+    if state.use_triton:
         from .kernels.exact import rmsnorm
         norm = rmsnorm
     else:
         norm = lambda module, x: module(x)
+    prefix_freeze = action == "freeze" and policy.freeze_scope == "prefix_through_visual"
+    frozen_queries = state.suffix if prefix_freeze else state.nonvisual
     normed = norm(layer.input_layernorm, hidden)
-    if family == "llava_next" and action == "freeze" and state.suffix.numel() == 0:
+    if family == "llava_next" and action == "freeze" and frozen_queries.numel() == 0:
         # No suffix queries exist, but future decode tokens still need this
         # layer's prefix K/V. Preserve every hidden row without computing Q/O,
         # SDPA, post-attention normalization, or the FFN.
@@ -94,18 +97,18 @@ def operator_forward(layer, hidden, action, state, policy, kwargs):
         output = post if state.optimized else post.clone()
         output.index_copy_(1, nonvisual, selected_post + update)
     else:
-        queries = state.suffix.to(hidden.device) if action == "freeze" else nonvisual
+        queries = frozen_queries.to(hidden.device) if action == "freeze" else nonvisual
         delta = selected_attention(layer.self_attn, normed, queries, family,
                                    past_key_value=cache, state=state,
-                                   suffix_start=state.suffix_start if action == "freeze" else None,
+                                   suffix_start=state.suffix_start if prefix_freeze else None,
                                    **attention_kwargs)
         post = hidden.clone()
-        selected = hidden[:, state.suffix_start:] if state.optimized and action == "freeze" else hidden.index_select(1, queries)
+        selected = hidden[:, state.suffix_start:] if state.optimized and prefix_freeze else hidden.index_select(1, queries)
         updated = selected + delta
         if action == "freeze":
-            # Historical freeze execution updates only the suffix after the last visual token.
+            # Update text rows selected by the configured freeze scope.
             updated = updated + mlp_update(layer, norm(layer.post_attention_layernorm, updated), policy.mlp_chunk_size)
-            if state.optimized:
+            if state.optimized and prefix_freeze:
                 post[:, state.suffix_start:].copy_(updated)
             else:
                 post.index_copy_(1, queries, updated)
